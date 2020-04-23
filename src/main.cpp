@@ -13,6 +13,8 @@
 #include "i2c_smbus.h"
 #include <stdlib.h>
 
+#include <std_msgs/Float64MultiArray.h>
+
 extern std::vector<i2c_smbus_interface *> busses;
 extern std::vector<RGBController *> rgb_controllers;
 
@@ -321,6 +323,24 @@ void ApplyOptions(DeviceOptions &options)
     }
 }
 
+void led_callback(const std_msgs::Float64MultiArray::ConstPtr &msg) {
+	float rgbled[18];
+	int i,j,k;
+	for(i=0;i<18;i++){
+		rgbled[i] = msg->data[i];
+	}
+	for(j=0;j<6;j++){
+		k=j*3;
+		printf("R:%5.1f G:%5.1f B:%5.1f   ",rgbled[k],rgbled[k+1],rgbled[k+2]);
+	}
+	printf("\n");
+
+	//for(i=0;i<6;i++){
+    //    k=j*3;
+	//	device->SetLED(i,ToRGBColor(rgbled[k],rgbled[k+1],rgbled[k+2]))
+	//}
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -338,13 +358,18 @@ int main(int argc, char *argv[])
 
     if (argc == 2 && (!strcmp(argv[1], "-o")))
     {
-        std::cout << "Custom Control" << std::endl;
+        std::cout << "Custom Control \n" << std::endl;
         DetectRGBControllers();
-
-        RGBController *device = rgb_controllers[0];
-
+	    std::cout << "Custom Control_1 \n" << std::endl;
+        //RGBController *device = rgb_controllers[0];
+	    std::cout << "Custom Control_2 \n" << std::endl;
         int mode = 0;
-        device->SetMode(mode);
+        //device->SetMode(mode);
+
+	    ros::init(argc, argv, "led_subscriber_node");
+	    ros::NodeHandle nh;
+	    ros::Subscriber get_odometry = nh.subscribe("/rgbled_topic",1, &led_callback);
+	    ros::spin();
 
         /*
         for (int i = 0; i < 100; i++)
@@ -358,7 +383,7 @@ int main(int argc, char *argv[])
             usleep(100000);
         }*/
 
-        for (int i = 0; i < 256; i++)
+        /*for (int i = 0; i < 256; i++)
         {
             device->SetLED(0, ToRGBColor(i, 255 - i, 0));
             device->SetLED(1, ToRGBColor(i, 255 - i, 0));
@@ -369,7 +394,7 @@ int main(int argc, char *argv[])
 
             
             usleep(5000);
-        }
+        }*/
 
         return 0;
     }
