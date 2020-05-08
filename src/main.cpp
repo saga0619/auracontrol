@@ -326,22 +326,14 @@ RGBController *device_gl; // = rgb_controllers[0];
 void led_callback(const std_msgs::Int32MultiArray::ConstPtr &msg)
 {
     int rgbled[18];
-    int i, j, k;
-    for (i = 0; i < 18; i++)
+    for (int i = 0; i < 18; i++)
     {
         rgbled[i] = msg->data[i];
     }
-    for (j = 0; j < 6; j++)
-    {
-        k = j * 3;
-        printf("R:%d G:%d B:%d   ", rgbled[k], rgbled[k + 1], rgbled[k + 2]);
-    }
-    printf("\n");
     device_gl->SetMode(0);
-    for (i = 0; i < 6; i++)
+    for (int i = 0; i < 6; i++)
     {
-        k = i * 3;
-        device_gl->SetLED(i, ToRGBColor(rgbled[k], rgbled[k + 1], rgbled[k + 2]));
+        device_gl->SetLED(i, ToRGBColor(rgbled[i * 3], rgbled[i * 3 + 1], rgbled[i * 3 + 2]));
     }
 }
 
@@ -351,37 +343,11 @@ int main(int argc, char *argv[])
     DetectRGBControllers();
     device_gl = rgb_controllers[0];
     int mode = 0;
-    //device->SetMode(mode);
 
     ros::init(argc, argv, "led_subscriber_node");
     ros::NodeHandle nh;
     ros::Subscriber get_odometry = nh.subscribe("/rgbled_topic", 1, &led_callback);
     ros::spin();
-
-    /*
-        for (int i = 0; i < 100; i++)
-        {
-            device->SetLED(i%6, ToRGBColor(255, 0, 0));
-            device->SetLED((i+1)%6, ToRGBColor(128, 0, 0));
-            device->SetLED((i+2)%6, ToRGBColor(64, 0, 0));
-            device->SetLED((i+3)%6, ToRGBColor(32, 0, 0));
-            device->SetLED((i+4)%6, ToRGBColor(16, 0, 0));
-            device->SetLED((i+5)%6, ToRGBColor(8, 0, 0));
-            usleep(100000);
-        }*/
-
-    /*for (int i = 0; i < 256; i++)
-        {
-            device->SetLED(0, ToRGBColor(i, 255 - i, 0));
-            device->SetLED(1, ToRGBColor(i, 255 - i, 0));
-            device->SetLED(2, ToRGBColor(i, 255 - i, 0));
-            device->SetLED(3, ToRGBColor(i, 255 - i, 0));
-            device->SetLED(4, ToRGBColor(i, 255 - i, 0));
-            device->SetLED(5, ToRGBColor(i, 255 - i, 0));
-
-            
-            usleep(5000);
-        }*/
 
     return 0;
 }
